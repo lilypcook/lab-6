@@ -87,7 +87,7 @@ remove_outliers <- function(df, ..., sd_thresh = 3) {
     # identify obs that are ouliers
     remove <- abs(z_scores) >= sd_thresh
 
-    # Filter the dataframe
+    # remove outliers from df 
     df_filtered <- df_filtered[-remove, ]
   }
 
@@ -134,6 +134,43 @@ remove_outliers(diamonds,
 ```{r}
 #| label: exercise-2
 
+impute_missing <- function(df, ..., impute_fun = mean) {
+  selected_cols <- rlang::enquos(...)
+  
+  # warning message for no columns selected
+  if (length(selected_cols) == 0) {
+    warning("No columns specified for imputation, returning original dataframe")
+    return(df)
+  }
+  
+  # selecting df columns, !!! allows for unquoting (... is usable)
+  filtered_df <- df %>% dplyr::select(!!!selected_cols)
+  col_names <- names(filtered_df)
+  
+  # warning message for when all columns do not exist
+  if (length(col_names) == 0) {
+     stop("Columns specified do not exist")
+  }
+  
+  # checking is all cols numeric 
+  are_numeric <- sapply(filtered_df, is.numeric)
+  if (!all(are_numeric)) {
+    # id non-numeric and warning
+    non_numeric_selected_cols <- col_names[!are_numeric]
+    stop(paste("The following columns are non-numeric:", paste(non_numeric_selected_cols, collapse=", ")))
+  }
+  
+  df_imputed <- df %>%
+    mutate(
+      across(
+        .cols = all_of(col_names), #selecting cols
+        .fns = ~ {imputation_val <- impute_fun(.x, na.rm = TRUE) #creating impute values
+                  tidyr::replace_na(.x, imputation_val) #replacing NAs
+                  }
+      ))
+  
+  return(df_imputed)
+}
 
 ```
 
