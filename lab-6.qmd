@@ -209,7 +209,33 @@ If either option is `TRUE`, your function should call your `remove_outliers()` o
 ```{r}
 #| label: exercise-3
 
-
+fit_model <- function(df, mod_formula, remove_outliers = F, impute_missing = F, ...){
+  selected_cols <- rlang::enquos(...)
+  
+  # warning for no vars provided
+  if(length(selected_cols) == 0){
+    stop("Please provide variables in formula")
+  }
+  
+  # warning if no formula provided or if not a call object
+  if(is.call(mod_formula) == F | is.null(mod_formula) == T){
+    stop("Model formula is not specified correctly")
+  }
+  
+  df_filtered <- df
+  
+  if(remove_outliers == T){
+    df_filtered <- remove_outliers(df_filtered, !!!selected_cols)
+  }
+  
+  if(impute_missing == T){
+    df_filtered <- impute_missing(df_filtered, !!!selected_cols)
+  }
+  
+  model <- lm(mod_formula, data = df_filtered)
+  
+  return(model)
+}
 ```
 
 ## Testing Your Function!
@@ -225,6 +251,7 @@ fit_model(
   price, 
   carat
 )
+
 ```
 
 # Iteration
