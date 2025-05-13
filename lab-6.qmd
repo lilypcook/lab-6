@@ -224,14 +224,17 @@ fit_model <- function(df, mod_formula, remove_outliers = F, impute_missing = F, 
   
   df_filtered <- df
   
+  # removing outliers
   if(remove_outliers == T){
     df_filtered <- remove_outliers(df_filtered, !!!selected_cols)
   }
   
+  # imputing
   if(impute_missing == T){
     df_filtered <- impute_missing(df_filtered, !!!selected_cols)
   }
   
+  #fitting model
   model <- lm(mod_formula, data = df_filtered)
   
   return(model)
