@@ -12,6 +12,15 @@ This assignment will challenge your function writing abilities. I'm not going to
 
 # Setting the Stage
 
+```{r}
+#| label: libraries
+#| output: false
+
+library(tidyverse)
+library(purrr)
+
+```
+
 My number one use case for writing functions and iteration / looping is to perform some exploration or modeling repeatedly for different "tweaked" versions. For example, our broad goal might be to fit a linear regression model to our data. However, there are often multiple choices that we have to make in practice:
 
 -   Keep missing values or fill them in (imputation)?
@@ -294,6 +303,16 @@ df_arg_combos
 ```{r}
 #| label: exercise-4
 
+df_arg_combos <- crossing(
+    impute = c(TRUE, FALSE),
+    remove_outliers = c(TRUE, FALSE), 
+    mod = c(price ~ carat, 
+            price ~ carat + cut,
+            price ~ carat + cut + clarity,
+            price ~ carat + cut + clarity + color)
+)
+df_arg_combos
+
 ```
 
 ## Iterating Over the Parameters
@@ -305,5 +324,5 @@ We've arrived at the final step!
 ```{r}
 #| label: exercise-5
 
-
+pmap(df_arg_combos, fit_model, df = diamonds, price, carat)
 ```
